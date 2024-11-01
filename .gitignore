@@ -1,3 +1,4 @@
 .idea
 .settings
 src/main/resources/META-INF/persistence.xml
+*.xml
