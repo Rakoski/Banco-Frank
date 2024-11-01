@@ -3,9 +3,9 @@
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
         <properties>   
             <property name="javax.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
-            <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3304/banco_app?useSSL=false"/>
-            <property name="javax.persistence.jdbc.user" value="root"/>
-            <property name="javax.persistence.jdbc.password" value=""/>
+            <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/banco_app?useSSL=false"/>
+            <property name="javax.persistence.jdbc.user" value="Mateus"/>
+            <property name="javax.persistence.jdbc.password" value="Mateus0312"/>
       
             <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL8Dialect"/>
        

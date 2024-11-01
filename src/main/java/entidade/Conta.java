@@ -1,5 +1,6 @@
 package entidade;
 
+import java.math.BigInteger;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -29,7 +30,9 @@ public class Conta {
 	private String descricao;
 	private String tipoTransacao;
 	private String nomeCorrentista;
+	@Column(name = "cpfCorrentista", unique = true)
 	private String cpfCorrentista;
+	private BigInteger saldo;
 
 	public Long getId() {
 		return id;
@@ -85,6 +88,14 @@ public class Conta {
 
 	public void setCpfCorrentista(String cpfCorrentista) {
 		this.cpfCorrentista = cpfCorrentista;
+	}
+
+	public BigInteger getSaldo() {
+		return saldo;
+	}
+
+	public void setSaldo(BigInteger saldo) {
+		this.saldo = saldo;
 	}
 
 	@Override
