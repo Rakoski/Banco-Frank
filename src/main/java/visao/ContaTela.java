@@ -20,7 +20,7 @@ public class ContaTela {
 		conta.setValorOperacao(500.);
 		conta.setSaldo(BigInteger.valueOf(500));
 
-		controle.pagamento("04425225112", BigInteger.valueOf(300), "pix");
+		controle.pagamento("04425225111", BigInteger.valueOf(100), "pix");
 	}
 
 }

@@ -31,8 +31,6 @@ public class ContaServico {
 			throw new RuntimeException("Tipo de pagamento inválido!");
 		}
 
-
-
 		BigInteger saldo = conta.getSaldo();
 		if (Objects.isNull(saldo) || saldo.doubleValue() < 0) {
 			throw new RuntimeException("Saldo menor que zero!");
@@ -48,7 +46,7 @@ public class ContaServico {
 		BigInteger novoSaldo = BigInteger.valueOf(saldoInt - valorRetiradoInt);
 		conta.setSaldo(novoSaldo);
 		conta.setDataTransacao(new Date());
-		conta = dao.inserir(conta);
+		conta = dao.atualizar(conta);
 
 		System.out.println("Pagamento realizado com sucesso!");
 		return conta;
