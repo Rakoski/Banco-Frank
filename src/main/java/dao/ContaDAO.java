@@ -1,88 +1,80 @@
 package dao;
 
+import java.util.Date;
 import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
+
 import entidade.Conta;
 
 public class ContaDAO {
-	private EntityManagerFactory emf = Persistence.createEntityManagerFactory("bancoPU");
+
+	EntityManagerFactory emf = Persistence.createEntityManagerFactory("bancoPU");
 
 	public Conta inserir(Conta conta) {
 		EntityManager em = emf.createEntityManager();
-		try {
-			em.getTransaction().begin();
-			em.persist(conta);
-			em.getTransaction().commit();
-			return conta;
-		} catch (Exception e) {
-			em.getTransaction().rollback();
-			throw e;
-		} finally {
-			em.close();
-		}
+		em.getTransaction().begin();
+		em.persist(conta);
+		em.getTransaction().commit();
+		em.close();
+		return conta;
 	}
 
-	public Conta atualizar(Conta conta) {
-		EntityManager em = emf.createEntityManager();
-		try {
+	public Conta alterar(Conta conta) {
+		Conta contaBanco = null;
+		if (conta.getId() != null) {
+			EntityManager em = emf.createEntityManager();
 			em.getTransaction().begin();
-			conta = em.merge(conta);
+
+			contaBanco = buscarPorId(conta.getId());
+
+			if (contaBanco != null) {
+				contaBanco.setDescricao(conta.getDescricao());
+				em.merge(contaBanco);
+			}
+
 			em.getTransaction().commit();
-			return conta;
-		} catch (Exception e) {
-			em.getTransaction().rollback();
-			throw e;
-		} finally {
 			em.close();
 		}
+		return contaBanco;
 	}
 
 	public void excluir(Long id) {
 		EntityManager em = emf.createEntityManager();
-		try {
-			em.getTransaction().begin();
-			Conta conta = em.find(Conta.class, id);
-			if (conta != null) {
-				em.remove(conta);
-			}
-			em.getTransaction().commit();
-		} catch (Exception e) {
-			em.getTransaction().rollback();
-			throw e;
-		} finally {
-			em.close();
+		em.getTransaction().begin();
+		Conta conta = em.find(Conta.class, id);
+		if (conta != null) {
+			em.remove(conta);
 		}
+		em.getTransaction().commit();
+		em.close();
 	}
 
 	public List<Conta> listarTodos() {
 		EntityManager em = emf.createEntityManager();
-		try {
-			return em.createQuery("from Conta", Conta.class).getResultList();
-		} finally {
-			em.close();
-		}
+		// hql: hibernate query language
+		List<Conta> contas = em.createQuery("from Conta").getResultList();
+		em.close();
+		return contas;
 	}
+	// buscar todas as contas de acordo com o CPF
+	// buscar todas as contas de acordo com o tipo da transação
 
 	public List<Conta> buscarPorCpf(String cpf) {
-		EntityManager em = emf.createEntityManager();
-		try {
-			Query query = em.createQuery("from Conta where cpfCorrentista = :cpf");
-			query.setParameter("cpf", cpf);
-			return query.getResultList();
-		} finally {
+			EntityManager em = emf.createEntityManager();
+			Query query = em.createQuery("from Conta where cpfCorrentista='"+cpf+"'");
 			em.close();
-		}
+			return query.getResultList();
 	}
 
 	public Conta buscarPorId(Long id) {
 		EntityManager em = emf.createEntityManager();
-		try {
-			return em.find(Conta.class, id);
-		} finally {
-			em.close();
-		}
+		Conta conta = em.find(Conta.class, id);
+		em.close();
+		return conta;
+		// return em.find(Conta.class, id);
 	}
 }

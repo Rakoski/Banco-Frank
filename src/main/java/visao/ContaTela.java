@@ -1,6 +1,5 @@
 package visao;
 
-import java.math.BigInteger;
 import java.util.Date;
 
 import controle.ContaControle;
@@ -18,9 +17,8 @@ public class ContaTela {
 		conta.setNomeCorrentista("José");
 		conta.setTipoTransacao("depósito");
 		conta.setValorOperacao(500.);
-		conta.setSaldo(BigInteger.valueOf(500));
-
-		controle.pagamento("04425225112", BigInteger.valueOf(300), "pix");
+		
+		controle.inserir(conta);
 	}
 
 }
