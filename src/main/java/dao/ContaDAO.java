@@ -1,10 +1,12 @@
 package dao;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.persistence.Query;
+import java.util.Optional;
+import javax.persistence.*;
+
+import entidade.Cliente;
 import entidade.Conta;
 
 public class ContaDAO {
@@ -66,11 +68,45 @@ public class ContaDAO {
 		}
 	}
 
-	public List<Conta> buscarPorCpf(String cpf) {
+	public List<Conta> buscarPorCliente(Cliente cliente) {
 		EntityManager em = emf.createEntityManager();
 		try {
-			Query query = em.createQuery("from Conta where cpfCorrentista = :cpf");
-			query.setParameter("cpf", cpf);
+			TypedQuery<Conta> query = em.createQuery(
+					"SELECT c FROM Conta c WHERE c.cliente = :cliente",
+					Conta.class
+			);
+			query.setParameter("cliente", cliente);
+
+			try {
+				return query.getResultList();
+			} catch (NoResultException e) {
+				throw new NoResultException("Conta não encontrada com o cliente: " + cliente);
+			}
+
+		} finally {
+			em.close();
+		}
+	}
+
+	public List<Conta> buscarPorDataDeTransacaoAteOntem(Date dataInicial) {
+		EntityManager em = emf.createEntityManager();
+		try {
+			Calendar calendar = Calendar.getInstance();
+			calendar.add(Calendar.DAY_OF_MONTH, -1);
+			calendar.set(Calendar.HOUR_OF_DAY, 23);
+			calendar.set(Calendar.MINUTE, 59);
+			calendar.set(Calendar.SECOND, 59);
+			calendar.set(Calendar.MILLISECOND, 999);
+
+			Date ontem = calendar.getTime();
+
+			TypedQuery<Conta> query = em.createQuery(
+					"SELECT c FROM Conta c WHERE c.dataTransacao BETWEEN :dataInicial AND :dataLimite",
+					Conta.class
+			);
+			query.setParameter("dataInicial", dataInicial);
+			query.setParameter("dataLimite", ontem);
+
 			return query.getResultList();
 		} finally {
 			em.close();

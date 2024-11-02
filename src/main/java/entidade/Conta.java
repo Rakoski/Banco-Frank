@@ -3,17 +3,7 @@ package entidade;
 import java.math.BigInteger;
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Persistence;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "conta")
@@ -25,14 +15,16 @@ public class Conta {
 	@Column(name = "valor_operacao")
 	private Double valorOperacao;
 	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "data_transacao")
 	private Date dataTransacao;
 	@Column(length = 150, name = "descricao", nullable = true, unique = false)
 	private String descricao;
+	@Column(name = "tipo_transacao")
 	private String tipoTransacao;
-	private String nomeCorrentista;
-	@Column(name = "cpfCorrentista", unique = true)
-	private String cpfCorrentista;
-	private BigInteger saldo;
+
+	@ManyToOne
+	@JoinColumn(name = "cliente_id")
+	private Cliente cliente;
 
 	public Long getId() {
 		return id;
@@ -74,35 +66,23 @@ public class Conta {
 		this.tipoTransacao = tipoTransacao;
 	}
 
-	public String getNomeCorrentista() {
-		return nomeCorrentista;
+	public Cliente getCliente() {
+		return cliente;
 	}
 
-	public void setNomeCorrentista(String nomeCorrentista) {
-		this.nomeCorrentista = nomeCorrentista;
-	}
-
-	public String getCpfCorrentista() {
-		return cpfCorrentista;
-	}
-
-	public void setCpfCorrentista(String cpfCorrentista) {
-		this.cpfCorrentista = cpfCorrentista;
-	}
-
-	public BigInteger getSaldo() {
-		return saldo;
-	}
-
-	public void setSaldo(BigInteger saldo) {
-		this.saldo = saldo;
+	public void setCliente(Cliente cliente) {
+		this.cliente = cliente;
 	}
 
 	@Override
 	public String toString() {
-		return "Conta [id=" + id + ", valorOperacao=" + valorOperacao + ", dataTransacao=" + dataTransacao
-				+ ", descricao=" + descricao + ", tipoTransacao=" + tipoTransacao + ", nomeCorrentista="
-				+ nomeCorrentista + ", cpfCorrentista=" + cpfCorrentista + "]";
+		return "Conta{" +
+				"id=" + id +
+				", valorOperacao=" + valorOperacao +
+				", dataTransacao=" + dataTransacao +
+				", descricao='" + descricao + '\'' +
+				", tipoTransacao='" + tipoTransacao + '\'' +
+				", cliente=" + cliente +
+				'}';
 	}
-
 }

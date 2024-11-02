@@ -4,52 +4,79 @@ import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
+import dao.ClienteDAO;
 import dao.ContaDAO;
+import entidade.Cliente;
 import entidade.Conta;
 import util.ValidationUtils;
 
 public class ContaServico {
-	ContaDAO dao = new ContaDAO();
+	ContaDAO contaDao = new ContaDAO();
+	ClienteDAO clienteDAO = new ClienteDAO();
 	ValidationUtils validationUtils = new ValidationUtils();
 
-	public Conta inserir(Conta conta) throws Exception {
-		conta.setDescricao("Operação de "+conta.getTipoTransacao());
-		conta.setDataTransacao(new Date());
-		return dao.inserir(conta);
-	}
+	public Conta pagamento(Conta conta, String cpf, BigInteger valor, String tipoOperacao) throws Exception {
+		validationUtils.validateCpf(cpf);
+		List<Cliente> clientes = clienteDAO.buscarPorCpf(cpf);
 
-	public Conta pagamento(String cpf, BigInteger valor, String tipoOperacao) throws Exception {
-		if (!validationUtils.validateCpf(cpf)) {
-			throw new RuntimeException("CPF inválido!");
+		assert clientes.size() == 0 : "Cliente inválido!";
+		Cliente cliente = clientes.get(0);
+		List<Conta> contas = contaDao.buscarPorCliente(cliente);
+		BigInteger saldo = cliente.getSaldo();
+
+		if (contas.size() == 0) {
+			assert Objects.nonNull(saldo) : "Saldo não pode ser nulo";
+			assert saldo.compareTo(BigInteger.ZERO) >= 0 : "Saldo menor que zero!";
+
+			int saldoInt = Integer.parseInt(String.valueOf(saldo));
+			int valorRetiradoInt = Integer.parseInt(String.valueOf(valor));
+
+			int taxaRetirada = validationUtils.validaTipoPagamento(conta, tipoOperacao, valor);
+			assert saldoInt >= (valorRetiradoInt + taxaRetirada) : "Valor a ser retirado maior que o saldo!";
+
+			conta.setDataTransacao(new Date());
+
+			conta.setCliente(cliente);
+			contaDao.inserir(conta);
+
+			BigInteger novoSaldo = BigInteger.valueOf(saldoInt - (valorRetiradoInt + taxaRetirada));
+			cliente.setSaldo(novoSaldo);
+			clienteDAO.atualizar(cliente);
+			System.out.println("Pagamento realizado com sucesso!");
+
+			if (novoSaldo.doubleValue() < 100.00) {
+				System.out.println("Saldo abaixo de 100!");
+			}
+
+			return conta;
 		}
 
-		List<Conta> contas = dao.buscarPorCpf(cpf);
-		Conta conta = contas.get(0);
+		List<Conta> contasExistentes = contaDao.buscarPorCliente(cliente);
+		Conta contaExistente = contasExistentes.get(contasExistentes.size());
 
-		if (!validationUtils.validaTipoPagamento(conta, tipoOperacao, valor)) {
-			throw new RuntimeException("Tipo de pagamento inválido!");
-		}
+		assert Objects.nonNull(saldo) : "Saldo não pode ser nulo";
+		assert saldo.compareTo(BigInteger.ZERO) >= 0 : "Saldo menor que zero!";
 
-		BigInteger saldo = conta.getSaldo();
-		if (Objects.isNull(saldo) || saldo.doubleValue() < 0) {
-			throw new RuntimeException("Saldo menor que zero!");
-		}
+		int saldoInt = Integer.parseInt(String.valueOf(saldo));
+		int valorRetiradoInt = Integer.parseInt(String.valueOf(valor));
 
-		Integer saldoInt = Integer.valueOf(String.valueOf(saldo));
-		Integer valorRetiradoInt = Integer.valueOf(String.valueOf(valor));
+		int taxaRetirada = validationUtils.validaTipoPagamento(contaExistente, tipoOperacao, valor);
+		assert saldoInt >= (valorRetiradoInt + taxaRetirada) : "Valor a ser retirado maior que o saldo!";
 
-		if (saldoInt < valorRetiradoInt) {
-			throw new RuntimeException("Valor a ser retirado maior que o saldo!");
-		}
-
-		BigInteger novoSaldo = BigInteger.valueOf(saldoInt - valorRetiradoInt);
-		conta.setSaldo(novoSaldo);
-		conta.setDataTransacao(new Date());
-		conta = dao.atualizar(conta);
+		contaExistente.setDataTransacao(new Date());
+		contaDao.inserir(conta);
+		BigInteger novoSaldo = BigInteger.valueOf(saldoInt - (valorRetiradoInt + taxaRetirada));
+		cliente.setSaldo(novoSaldo);
+		clienteDAO.atualizar(cliente);
 
 		System.out.println("Pagamento realizado com sucesso!");
+
+		if (novoSaldo.doubleValue() < 100.00) {
+			System.out.println("Saldo abaixo de 100!");
+		}
+
 		return conta;
 	}
-
 }
