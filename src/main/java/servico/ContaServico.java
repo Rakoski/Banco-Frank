@@ -26,16 +26,16 @@ public class ContaServico {
 		List<Conta> contas = contaDao.buscarPorCliente(cliente);
 		BigInteger saldo = cliente.getSaldo();
 
+		assert Objects.nonNull(saldo) : "Saldo não pode ser nulo";
+		assert saldo.compareTo(BigInteger.ZERO) >= 0 : "Saldo menor que zero!";
+
+		int saldoInt = Integer.parseInt(String.valueOf(saldo));
+		int valorRetiradoInt = Integer.parseInt(String.valueOf(valor));
+		int taxaRetirada = validationUtils.validaTipoPagamento(conta, tipoOperacao, valor);
+
+		assert saldoInt >= (valorRetiradoInt + taxaRetirada) : "Valor a ser retirado maior que o saldo!";
+
 		if (contas.size() == 0) {
-			assert Objects.nonNull(saldo) : "Saldo não pode ser nulo";
-			assert saldo.compareTo(BigInteger.ZERO) >= 0 : "Saldo menor que zero!";
-
-			int saldoInt = Integer.parseInt(String.valueOf(saldo));
-			int valorRetiradoInt = Integer.parseInt(String.valueOf(valor));
-
-			int taxaRetirada = validationUtils.validaTipoPagamento(conta, tipoOperacao, valor);
-			assert saldoInt >= (valorRetiradoInt + taxaRetirada) : "Valor a ser retirado maior que o saldo!";
-
 			conta.setDataTransacao(new Date());
 
 			conta.setCliente(cliente);
@@ -54,18 +54,10 @@ public class ContaServico {
 		}
 
 		List<Conta> contasExistentes = contaDao.buscarPorCliente(cliente);
-		Conta contaExistente = contasExistentes.get(contasExistentes.size());
-
-		assert Objects.nonNull(saldo) : "Saldo não pode ser nulo";
-		assert saldo.compareTo(BigInteger.ZERO) >= 0 : "Saldo menor que zero!";
-
-		int saldoInt = Integer.parseInt(String.valueOf(saldo));
-		int valorRetiradoInt = Integer.parseInt(String.valueOf(valor));
-
-		int taxaRetirada = validationUtils.validaTipoPagamento(contaExistente, tipoOperacao, valor);
-		assert saldoInt >= (valorRetiradoInt + taxaRetirada) : "Valor a ser retirado maior que o saldo!";
+		Conta contaExistente = contasExistentes.get(contasExistentes.size() - 1);
 
 		contaExistente.setDataTransacao(new Date());
+		conta.setCliente(cliente);
 		contaDao.inserir(conta);
 		BigInteger novoSaldo = BigInteger.valueOf(saldoInt - (valorRetiradoInt + taxaRetirada));
 		cliente.setSaldo(novoSaldo);

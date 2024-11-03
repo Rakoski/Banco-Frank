@@ -121,4 +121,60 @@ public class ContaDAO {
 			em.close();
 		}
 	}
+
+	public List<Conta> buscarOperacoesPorClienteEData(Cliente cliente, Date data) {
+		EntityManager em = emf.createEntityManager();
+		try {
+			Calendar startDay = Calendar.getInstance();
+			startDay.setTime(data);
+			startDay.set(Calendar.HOUR_OF_DAY, 0);
+			startDay.set(Calendar.MINUTE, 0);
+			startDay.set(Calendar.SECOND, 0);
+			startDay.set(Calendar.MILLISECOND, 0);
+
+			Calendar endDay = Calendar.getInstance();
+			endDay.setTime(data);
+			endDay.set(Calendar.HOUR_OF_DAY, 23);
+			endDay.set(Calendar.MINUTE, 59);
+			endDay.set(Calendar.SECOND, 59);
+			endDay.set(Calendar.MILLISECOND, 999);
+
+			TypedQuery<Conta> query = em.createQuery(
+					"SELECT c FROM Conta c WHERE c.cliente = :cliente " +
+							"AND c.dataTransacao BETWEEN :startDay AND :endDay",
+					Conta.class
+			);
+			query.setParameter("cliente", cliente);
+			query.setParameter("startDay", startDay.getTime());
+			query.setParameter("endDay", endDay.getTime());
+
+			return query.getResultList();
+		} finally {
+			em.close();
+		}
+	}
+
+	public List<Conta> buscarTransacoesPorPeriodo(Cliente cliente, Date dataInicio, Date dataFim) {
+		EntityManager em = emf.createEntityManager();
+		try {
+			TypedQuery<Conta> query = em.createQuery(
+					"SELECT c FROM Conta c " +
+							"WHERE c.cliente.id = :clienteId " +
+							"AND c.dataTransacao BETWEEN :dataInicio AND :dataFim " +
+							"ORDER BY c.dataTransacao",
+					Conta.class
+			);
+
+			query.setParameter("clienteId", cliente.getId());
+			query.setParameter("dataInicio", dataInicio);
+			query.setParameter("dataFim", dataFim);
+
+			List<Conta> resultado = query.getResultList();
+			System.out.println("Número de transações encontradas: " + resultado.size());
+
+			return resultado;
+		} finally {
+			em.close();
+		}
+	}
 }
