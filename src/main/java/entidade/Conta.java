@@ -21,6 +21,8 @@ public class Conta {
 	private String descricao;
 	@Column(name = "tipo_transacao")
 	private String tipoTransacao;
+	@Column(name = "tipo_conta")
+	private String tipoConta;
 
 	@ManyToOne
 	@JoinColumn(name = "cliente_id")
@@ -72,6 +74,15 @@ public class Conta {
 
 	public void setCliente(Cliente cliente) {
 		this.cliente = cliente;
+	}
+
+	public String getTipoConta() {
+
+		return tipoConta;
+	}
+
+	public void setTipoConta(String tipoConta) {
+		this.tipoConta = tipoConta;
 	}
 
 	@Override
