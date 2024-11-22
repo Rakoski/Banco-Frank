@@ -21,7 +21,7 @@ public class ContaServico {
 		validationUtils.validateCpf(cpf);
 		List<Cliente> clientes = clienteDAO.buscarPorCpf(cpf);
 
-		assert clientes.size() == 0 : "Cliente inválido!";
+		assert clientes.isEmpty() : "Cliente inválido!";
 		Cliente cliente = clientes.get(0);
 		List<Conta> contas = contaDao.buscarPorCliente(cliente);
 		BigInteger saldo = cliente.getSaldo();
@@ -35,7 +35,7 @@ public class ContaServico {
 
 		assert saldoInt >= (valorRetiradoInt + taxaRetirada) : "Valor a ser retirado maior que o saldo!";
 
-		if (contas.size() == 0) {
+		if (contas.isEmpty()) {
 			conta.setDataTransacao(new Date());
 
 			conta.setCliente(cliente);
